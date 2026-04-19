@@ -51,6 +51,7 @@ export default function PlayerDashboard() {
     onTransactionChange: bump,
     onRoomChange: (p) => { if (p.new) setRoom(p.new); },
     onPropertiesChange: bump,
+    onPoll: bump,
   });
 
   const totalBalance = DENOMINATIONS.reduce((s, d) => s + (inventory[d] || 0) * d, 0);

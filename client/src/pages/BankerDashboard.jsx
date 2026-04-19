@@ -46,6 +46,7 @@ export default function BankerDashboard() {
     onTransactionChange: bump,
     onAuditLog: bump,
     onPropertiesChange: bump,
+    onPoll: bump,
   });
 
   if (loading) return (
@@ -138,16 +139,19 @@ export default function BankerDashboard() {
   );
 }
 
-// Mini component: show change_failed alerts to banker
+// Mini component: show pending + change_failed transaction alerts to banker
 function TransactionAlerts({ roomId, refresh }) {
   const [alerts, setAlerts] = useState([]);
+  const [pending, setPending] = useState([]);
   useEffect(() => {
     api.getTransactions().then(d => {
-      setAlerts((d.transactions || []).filter(t => t.status === 'change_failed'));
+      const txns = d.transactions || [];
+      setAlerts(txns.filter(t => t.status === 'change_failed'));
+      setPending(txns.filter(t => t.status === 'pending'));
     }).catch(() => {});
   }, [refresh]);
 
-  if (!alerts.length) return (
+  if (!alerts.length && !pending.length) return (
     <div className="empty-state" style={{ padding: 32 }}>
       <div className="icon">✅</div>
       <p>No alerts. Game running smoothly.</p>
@@ -156,6 +160,17 @@ function TransactionAlerts({ roomId, refresh }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {pending.map(txn => (
+        <div key={txn.id} className="card card-sm" style={{ borderColor: 'var(--gold-dim)', background: 'var(--gold-glow)' }}>
+          <div className="flex items-center justify-between">
+            <span className="text-sm">
+              💸 <strong>{txn.sender?.name}</strong> → <strong>{txn.receiver?.name}</strong>: {formatCurrency(txn.amount_sent)}
+            </span>
+            <span className="status-pill pending"><span className="dot" />Awaiting acceptance</span>
+          </div>
+          {txn.message && <div className="text-xs text-muted" style={{ marginTop: 4, fontStyle: 'italic' }}>"{txn.message}"</div>}
+        </div>
+      ))}
       {alerts.map(txn => (
         <div key={txn.id} className="alert alert-danger">
           ⚠️ <strong>Change Failed</strong> — {txn.sender?.name} → {txn.receiver?.name}:
