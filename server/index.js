@@ -22,6 +22,14 @@ app.use('/api/transactions', transactionRoutes);
 // Health check
 app.get('/api/health', (req, res) => res.json({ status: 'ok', time: new Date().toISOString() }));
 
+// Root route
+app.get('/', (req, res) => {
+  res.json({
+    message: '🎲 International Business Ledger API is running!',
+    healthCheck: '/api/health'
+  });
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`\n🎲 International Business Ledger Server`);

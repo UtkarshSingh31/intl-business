@@ -1,4 +1,7 @@
-const API_URL = import.meta.env.VITE_API_URL || '/api';
+let API_URL = import.meta.env.VITE_API_URL || '/api';
+if (API_URL !== '/api' && !API_URL.endsWith('/api')) {
+  API_URL = `${API_URL.replace(/\/$/, '')}/api`;
+}
 
 const getToken = () => localStorage.getItem('ib_token');
 
